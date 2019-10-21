@@ -1,0 +1,109 @@
+
+\section{Programming exercise : Applying decision trees and k-nearest neighbors \problemworth{56}}
+
+\section*{Submission instructions}
+\begin{itemize}
+\item {\large Submit answers and plots for this problem together with the answers for question 1-3 on Gradescope. 
+	\ul{Submit your code for this problem on CCLE.}}
+\end{itemize}
+
+
+\section*{Introduction\footnote{This assignment is adapted from the Kaggle Titanic competition, available at \url{https://www.kaggle.com/c/titanic}. Some parts of the problem are copied verbatim from Kaggle.}}
+
+The sinking of the RMS Titanic is one of the most infamous shipwrecks in history.  On April 15, 1912, during her maiden voyage, the Titanic sank after colliding with an iceberg, killing 1502 out of 2224 passengers and crew. This sensational tragedy shocked the international community and led to better safety regulations for ships.
+
+One of the reasons that the shipwreck led to such loss of life was that there were not enough lifeboats for the passengers and crew. Although there was some element of luck involved in surviving the sinking, some groups of people were more likely to survive than others, such as women, children, and the upper-class.
+
+In this problem, we ask you to complete the analysis of what sorts of people were likely to survive. In particular, we ask you to apply the tools of machine learning to predict which passengers survived the tragedy.
+
+
+\section*{Getting started}
+
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+Code and data \url{https://ccle.ucla.edu/course/view/19F-COMSCIM146-1}
+\begin{itemize}[nolistsep]
+\item Code : \verb|titanic.py|
+\item Data : \verb|titanic_train.csv|
+\end{itemize}
+Functions to use
+\begin{itemize}[nolistsep]
+\item Decision Tree Classifier: \\{\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html}}
+\item K-Nearest Neighbor Classifier: \\{\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html}} 
+\item Cross-Validation: \\{\footnotesize \url{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html}}
+\item Metrics: \\{\footnotesize \url{http://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html}}
+\end{itemize}
+\vspace{-\baselineskip}
+\rule{\textwidth}{1pt}
+
+Download the code and data sets from CCLE website. For more information on the data set, see the Kaggle description: \url{https://www.kaggle.com/c/titanic/data}. The provided data sets are modified versions of the data available from Kaggle.\footnote{Passengers with missing values for any feature have been removed. Also, the categorical feature \verb|Sex| has been mapped to \verb|{'female': 0, 'male': 1}| and \verb|Embarked| to \verb|{'C': 0, 'Q': 1, 'S': 2}|.}
+
+{\bf Note that any portions of the code that you must modify have been indicated with \verb|TODO|. Do not change any code outside of these blocks.}
+
+
+\subsection{Visualization \problemworth{5}}
+
+One of the first things to do before trying any formal machine learning technique is to dive into the data. This can include looking for funny values in the data, looking for outliers, looking at the range of feature values, what features seem important, etc.
+
+\begin{enumerate}
+\item \itemworth{5} Run the code (\verb|titanic.py|) to make histograms for each feature, separating the examples by class (e.g. survival). This produces seven plots, one for each feature, and each plot should have two overlapping histograms, with the color of the histogram indicating the class. For each feature, what trends do you observe in the data? 
+
+Ans: \\
+PClass: More superior the ticket class is, the higher chance of survival is. \\
+Sex: Female has a much larger survival number and survival rate than male. \\
+Age: Children (age < 10) have a much larger survival rate then all other age groups. This is the only group with more survival than death. Most of the passengers aged from 20 to 40. \\
+Sibsp: Most passengers have zero sibling/spouse aboard. Passengers have 1 sibling/spouse have the highest rate of survival. \\
+Parch: Most passengers have zero parent/child aboard. Passengers have 1 or 2 parents/children have the highest rate of survival. 
+Fare: In general, the higher fare one paid, the higher change he survived. 
+Embarked: People who embarked at Cherbourg had the highest chance of survival. Most people embarked at Southampton. Fewest people embarked at Queenstown. 
+\end{enumerate}
+
+
+\subsection{Evaluation \problemworth{51}}
+
+Now, let us use \verb|scikit-learn| to train a \verb|DecisionTreeClassifier| and \verb|KNeighborsClassifier| on the data.
+Using the predictive capabilities of the \verb|scikit-learn| package is very simple. In fact, it can be carried out in three simple steps: initializing the model, fitting it to the training data, and predicting new values.\footnote{Almost all of the model techniques in \verb|scikit-learn| share a few common named functions, once they are initialized. You can always find out more about them in the documentation for each model. These are \verb|some_model_name.fit(...)|, \verb|some_model_name.predict(...)|, and \verb|some_model_name.score(...)|.}
+
+
+\begin{enumerate}[resume]
+
+\item \itemworth{5} Before trying out any classifier, it is often useful to establish a \emph{baseline}. We have implemented one simple baseline classifier, \verb|MajorityVoteClassifier|, that always predicts the majority class from the training set. Read through the \verb|MajorityVoteClassifier| and its usage and make sure you understand how it works.
+
+Your goal is to implement and evaluate another baseline classifier, \verb|RandomClassifier|, that predicts a target class according to the distribution of classes in the training data set. For example, if 60\% of the examples in the training set have \verb|Survived = 0| and 40\% have \verb|Survived = 1|, then, when applied to a test set, \verb|RandomClassifier| should randomly predict 60\% of the examples as \verb|Survived = 0| and 40\% as \verb|Survived = 1|.
+
+Implement the missing portions of \verb|RandomClassifier| according to the provided specifications. Then train your \verb|RandomClassifier| on the entire training data set, and evaluate its training error. If you implemented everything correctly, you should have an error about $0.40$ to $0.50$ range.
+
+\item \itemworth{5} Now that we have a baseline, train and evaluate a \verb|DecisionTreeClassifier| (using the class from \verb|scikit-learn| and referring to the documentation as needed). Make sure you initialize your classifier with the appropriate parameters; in particular, use the `entropy' criterion discussed in class. What is the training error of this classifier?
+
+
+\item \itemworth{5} Similar to the previous question, train and evaluate a \verb|KNeighborsClassifier| (using the class from \verb|scikit-learn| and referring to the documentation as needed). Use $k$=3, 5 and 7 as the number of neighbors and report the training error of this classifier.
+
+
+\item \itemworth{9} So far, we have looked only at training error, but as we learned in class, training error is a poor metric for evaluating classifiers. Let us use cross-validation instead.
+
+Implement the missing portions of \verb|error(...)| according to the provided specifications. You may find it helpful to use \verb|train_test_split(...)| from \verb|scikit-learn|. To ensure that we always get the same splits across different runs (and thus can compare the classifier results), set the \verb|random_state| parameter to be the trial number.
+
+
+Next, use your \verb|error(...)| function to evaluate the training error and (cross-validation) test error of each of your four models (for the \verb|KNeighborsClassifier|, use $k$=5). To do this, manually create a random $80/20$ split of the training data, train each model on the $80\%$ fraction, evaluate the error on either the $80\%$ or the $20\%$ fraction, and repeat this $100$ times to get an average result. What are the average training and test error of each of your classifiers on the Titanic data set?
+
+
+\item \itemworth{9} One way to find out the best value of $k$ for \verb|KNeighborsClassifier| is $n$-fold cross validation.
+Find out the best value of $k$ using 10-fold cross validation. You may find the \verb|cross_val_score(...)| from \verb|scikit-learn| helpful. Run 10-fold cross validation for all odd numbers ranging from 1 to 50 as the number of neighbors. Unlike part (e), the function \verb|cross_val_score(...)| will automatically split the data for you, so that you do not need to manually create the partitions. 
+Plot the validation error against the number of neighbors, $k$.
+Include this plot in your answer, and provide a 1-2 sentence description of your observations. What is the best value of $k$?
+
+
+\item \itemworth{9} One problem with decision trees is that they can \emph{overfit} to training data, yielding complex classifiers that do not generalize well to new data. Let us see whether this is the case for the Titanic data.
+
+One way to prevent decision trees from overfitting is to limit their depth. Repeat your cross-validation experiments but for increasing depth limits, specifically, $1,2,\ldots,20$. Then plot the average training error and test error against the depth limit. 
+Include this plot in your answer, making sure to label all axes and include a legend for your classifiers. What is the best depth limit to use for this data? Do you see overfitting? Justify your answers using the plot.
+
+\item \itemworth{9} Another useful tool for evaluating classifiers is \emph{learning curves}, which show how classifier performance (e.g. error) relates to experience (e.g. amount of training data).
+For this experiment, first generate a random 90/10 split of the training data and do the following experiments considering the 90\% fraction as training and 10\% for testing. 
+
+Run experiments for the decision tree and k-nearest neighbors classifier with the best depth limit and $k$ value you found above.
+This time, vary the amount of training data by starting with splits of $0.10$ ($10\%$ of the data from 90\% fraction) and working up to full size $1.00$ ($100\%$ of the data from 90\% fraction) in increments of $0.10$. Then plot the decision tree and k-nearest neighbors training and test error against the amount of training data. 
+Include this plot in your answer, and provide a 1-2 sentence description of your observations.
+
+
+\end{enumerate}
